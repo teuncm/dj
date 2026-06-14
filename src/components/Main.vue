@@ -1,19 +1,21 @@
 <script setup>
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 
+const asset = (filename) => `${import.meta.env.BASE_URL}${filename}`
+
 const photos = [
-  { src: '/DSC07707.jpg', alt: 'DJ performing with both hands raised', size: 'wide' },
-  { src: '/DSC08293.jpg', alt: 'Close portrait of DJ wearing headphones', size: 'tall' },
-  { src: '/DSC05404.jpg', alt: 'DJ mixing between dancers under red and blue club lights', size: 'standard' },
-  { src: '/flagshipfeest090920250048.jpg', alt: 'DJ performing aboard Flagship Amsterdam', size: 'wide' },
-  { src: '/DSC05162.jpg', alt: 'DJ performing on an outdoor stage', size: 'tall' },
-  { src: '/5870564160528125274.jpg', alt: 'DJ performing in a crowded venue', size: 'standard' },
-  { src: '/oerknal.jpeg', alt: 'DJ set under colorful club lights', size: 'standard' },
-  { src: '/DSC_0319.jpg', alt: 'DJ smiling and pointing during a live set', size: 'wide' },
-  { src: '/IMG_20220603_175713.jpg', alt: 'Portrait during a live DJ set', size: 'tall' },
-  { src: '/DSC07696.jpg', alt: 'DJ performing behind the booth at Panama', size: 'tall' },
-  { src: '/skoll.jpeg', alt: 'DJ performing for a festival crowd', size: 'wide' },
-  { src: '/5870564160528125276.jpg', alt: 'Crowd enjoying a live DJ set', size: 'standard' },
+  { src: asset('DSC07707.jpg'), alt: 'DJ performing with both hands raised', size: 'wide' },
+  { src: asset('DSC08293.jpg'), alt: 'Close portrait of DJ wearing headphones', size: 'tall' },
+  { src: asset('DSC05404.jpg'), alt: 'DJ mixing between dancers under red and blue club lights', size: 'standard' },
+  { src: asset('flagshipfeest090920250048.jpg'), alt: 'DJ performing aboard Flagship Amsterdam', size: 'wide' },
+  { src: asset('DSC05162.jpg'), alt: 'DJ performing on an outdoor stage', size: 'tall' },
+  { src: asset('5870564160528125274.jpg'), alt: 'DJ performing in a crowded venue', size: 'standard' },
+  { src: asset('oerknal.jpeg'), alt: 'DJ set under colorful club lights', size: 'standard' },
+  { src: asset('DSC_0319.jpg'), alt: 'DJ smiling and pointing during a live set', size: 'wide' },
+  { src: asset('IMG_20220603_175713.jpg'), alt: 'Portrait during a live DJ set', size: 'tall' },
+  { src: asset('DSC07696.jpg'), alt: 'DJ performing behind the booth at Panama', size: 'tall' },
+  { src: asset('skoll.jpeg'), alt: 'DJ performing for a festival crowd', size: 'wide' },
+  { src: asset('5870564160528125276.jpg'), alt: 'Crowd enjoying a live DJ set', size: 'standard' },
 ]
 
 const activePhoto = ref(null)
@@ -51,7 +53,7 @@ onBeforeUnmount(() => {
     </header>
 
     <section id="top" class="hero">
-      <img src="/flagshipfeest090920250048.jpg" alt="" />
+      <img :src="asset('flagshipfeest090920250048.jpg')" alt="" />
       <div class="hero-shade"></div>
       <div class="hero-copy">
         <p class="eyebrow"><span></span> Live energy</p>
