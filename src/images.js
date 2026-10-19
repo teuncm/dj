@@ -9,7 +9,8 @@ export const hero = {
 }
 
 export function imageSrc(image, format = 'webp', largest = false) {
-  return asset(image[format][largest ? image[format].length - 1 : Math.min(1, image[format].length - 1)].file)
+  const variants = image[format]
+  return asset((largest ? variants.at(-1) : variants.find(({ width }) => width >= 768) ?? variants.at(-1)).file)
 }
 
 export function imageSrcset(image, format) {
@@ -18,10 +19,6 @@ export function imageSrcset(image, format) {
 
 export function gallerySizes(photo) {
   return photo.size === 'wide'
-    ? '(max-width: 760px) calc(100vw - 24px), calc((188vw - 16px) / 3)'
-    : '(max-width: 760px) calc(100vw - 24px), calc((94vw - 32px) / 3)'
-}
-
-export function lightboxSizes(photo) {
-  return `min(90vw, ${88 * photo.image.width / photo.image.height}vh)`
+    ? 'auto, (max-width: 760px) calc(100vw - 24px), calc((188vw - 16px) / 3)'
+    : 'auto, (max-width: 760px) calc(100vw - 24px), calc((94vw - 32px) / 3)'
 }

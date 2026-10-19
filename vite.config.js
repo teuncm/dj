@@ -7,12 +7,20 @@ import { site } from './src/site-config.js'
 
 function portfolioAssets() {
   let config
+  let devServer
   const manifest = () => readFile(resolve(config.root, 'src/generated/images.json'), 'utf8').then(JSON.parse)
 
   return {
     name: 'portfolio-assets',
     configResolved(resolved) { config = resolved },
-    async transformIndexHtml() {
+    configureServer(server) { devServer = server },
+    handleHotUpdate({ file, server }) {
+      if (file.endsWith('.vue') || /[\\/]src[\\/](photos|site-config|images)\.js$/.test(file)) {
+        server.ws.send({ type: 'full-reload' })
+        return []
+      }
+    },
+    async transformIndexHtml(html) {
       const images = await manifest()
       const preloads = [
         { image: images.hero.mobile, media: '(max-width: 760px)' },
@@ -24,14 +32,18 @@ function portfolioAssets() {
           as: 'image',
           type: 'image/avif',
           media,
-          href: `${config.base}${image.avif[Math.min(1, image.avif.length - 1)].file}`,
+          href: `${config.base}${(image.avif.find(({ width }) => width >= 768) ?? image.avif.at(-1)).file}`,
           imagesrcset: image.avif.map(({ file, width }) => `${config.base}${file} ${width}w`).join(', '),
           imagesizes: '100vw',
           fetchpriority: 'high',
         },
         injectTo: 'head',
       }))
-      return [...preloads, ...seoTags(images)]
+      if (devServer) {
+        const { render } = await devServer.ssrLoadModule('/src/entry-server.js')
+        html = html.replace('<!--app-html-->', await render())
+      }
+      return { html, tags: [...preloads, ...seoTags(images)] }
     },
     async closeBundle() {
       if (config.command !== 'build') return

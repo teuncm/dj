@@ -1,36 +1,10 @@
 <script setup>
-import { onBeforeUnmount, onMounted, ref } from 'vue'
-import { images, hero, imageSrc, imageSrcset, gallerySizes, lightboxSizes } from '../images.js'
+import { images, hero, imageSrc, imageSrcset, gallerySizes } from '../images.js'
 import { photos as portfolioPhotos } from '../photos.js'
 import { site } from '../site-config.js'
 
 const photos = portfolioPhotos.map((photo) => ({ ...photo, image: images[photo.file] }))
 
-const activePhoto = ref(null)
-
-function openPhoto(event, photo) {
-  if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
-  event.preventDefault()
-  activePhoto.value = photo
-  document.body.classList.add('lightbox-open')
-}
-
-function closePhoto() {
-  activePhoto.value = null
-  document.body.classList.remove('lightbox-open')
-}
-
-function handleKeydown(event) {
-  if (event.key === 'Escape') closePhoto()
-}
-
-onMounted(() => {
-  window.addEventListener('keydown', handleKeydown)
-})
-onBeforeUnmount(() => {
-  window.removeEventListener('keydown', handleKeydown)
-  document.body.classList.remove('lightbox-open')
-})
 </script>
 
 <template>
@@ -85,7 +59,6 @@ onBeforeUnmount(() => {
           :data-photo="photo.file"
           :href="imageSrc(photo.image, 'webp', true)"
           :aria-label="`Open image ${index + 1}: ${photo.alt}`"
-          @click="openPhoto($event, photo)"
         >
           <picture>
             <source type="image/avif" :srcset="imageSrcset(photo.image, 'avif')" :sizes="gallerySizes(photo)" />
@@ -130,22 +103,14 @@ onBeforeUnmount(() => {
       <a :href="site.instagram" target="_blank" rel="noopener noreferrer">@dj_tune_m ↗</a>
     </footer>
 
-    <Transition name="fade">
-      <div v-if="activePhoto" class="lightbox" role="dialog" aria-modal="true" @click="closePhoto">
-        <button type="button" aria-label="Close image" @click="closePhoto">Close ×</button>
-        <picture @click.stop>
-          <source type="image/avif" :srcset="imageSrcset(activePhoto.image, 'avif')" :sizes="lightboxSizes(activePhoto)" />
-          <img
-            :src="imageSrc(activePhoto.image)"
-            :srcset="imageSrcset(activePhoto.image, 'webp')"
-            :sizes="lightboxSizes(activePhoto)"
-            :width="activePhoto.image.width"
-            :height="activePhoto.image.height"
-            :alt="activePhoto.alt"
-            decoding="async"
-          />
-        </picture>
+    <dialog class="lightbox" aria-label="Photo viewer">
+      <button class="lightbox-close" type="button" data-action="close" aria-label="Close image" autofocus>Close ×</button>
+      <div class="lightbox-image"></div>
+      <div class="lightbox-controls">
+        <button type="button" data-action="previous" aria-label="Previous photo">←</button>
+        <span class="lightbox-position" role="status" aria-live="polite"></span>
+        <button type="button" data-action="next" aria-label="Next photo">→</button>
       </div>
-    </Transition>
+    </dialog>
   </main>
 </template>

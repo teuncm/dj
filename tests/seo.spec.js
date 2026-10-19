@@ -2,6 +2,22 @@ import { readFile } from 'node:fs/promises'
 import { test, expect } from '@playwright/test'
 import { site } from '../src/site-config.js'
 import { photos } from '../src/photos.js'
+import { validateSeo } from '../scripts/validate-seo.mjs'
+
+test('build guard rejects SEO regressions before publication', async ({}, testInfo) => {
+  test.skip(testInfo.project.name === 'mobile', 'Build artifact checks are shared across viewports.')
+  const html = await readFile('dist/index.html', 'utf8')
+  const manifest = JSON.parse(await readFile('src/generated/images.json', 'utf8'))
+  expect(() => validateSeo(html, manifest)).not.toThrow()
+  const regressions = [
+    [html.replace(/<h1\b[^>]*>[\s\S]*?<\/h1>/, ''), /static H1/],
+    [html.replace('rel="canonical"', 'rel="alternate"'), /canonical URL/],
+    [html.replace('index, follow, max-image-preview:large', 'noindex, follow'), /allow indexing/],
+    [html.replace('data-photo="', 'data-removed="'), /gallery links/],
+    [html.replace('application/ld+json', 'application/json'), /structured data/],
+  ]
+  for (const [broken, message] of regressions) expect(() => validateSeo(broken, manifest)).toThrow(message)
+})
 
 test('serves the portfolio and image links with JavaScript disabled', async ({ browser, baseURL }) => {
   const context = await browser.newContext({ javaScriptEnabled: false })

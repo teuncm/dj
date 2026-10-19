@@ -75,22 +75,32 @@ test('loads every gallery photo on scroll and opens a fitted lightbox', async ({
   expect(bounds.width).toBeLessThanOrEqual(page.viewportSize().width)
   expect(bounds.height).toBeLessThanOrEqual(page.viewportSize().height * 0.89)
   await page.keyboard.press('Escape')
-  await expect(modal).toHaveCount(0)
+  await expect(modal).not.toBeVisible()
+  await expect(modal.locator('img')).toHaveCount(0)
   await expect(page.locator('body')).not.toHaveClass(/lightbox-open/)
 })
 
-test('falls back to responsive WebP when AVIF is unsupported', async ({ page }) => {
+test('falls back to responsive WebP and explicit sizes when newer image features are unsupported', async ({ page }) => {
   // Make AVIF sources unsupported without changing the responsive WebP fallbacks.
   await page.route('**/assets/*.js', async (route) => {
     const response = await route.fetch()
-    await route.fulfill({ response, body: (await response.text()).replaceAll('image/avif', 'image/unsupported') })
+    await route.fulfill({ response, body: (await response.text()).replaceAll('image/avif', 'image/unsupported').replaceAll('auto, ', '') })
   })
   await page.route('**/dj/', async (route) => {
     const response = await route.fetch()
-    await route.fulfill({ response, body: (await response.text()).replaceAll('image/avif', 'image/unsupported') })
+    await route.fulfill({ response, body: (await response.text()).replaceAll('image/avif', 'image/unsupported').replaceAll('auto, ', '') })
   })
   await page.goto('./')
   const image = page.locator('.hero img')
   await expect.poll(() => image.evaluate((element) => element.complete && element.naturalWidth > 0)).toBe(true)
   expect(await image.evaluate((element) => element.currentSrc)).toMatch(/\.webp$/)
+  const thumbnail = page.locator('.gallery-item').nth(2)
+  await expect(thumbnail.locator('img')).not.toHaveAttribute('sizes', /auto/)
+  await thumbnail.scrollIntoViewIfNeeded()
+  await expect.poll(() => thumbnail.locator('img').evaluate((element) => element.complete && element.naturalWidth > 0)).toBe(true)
+  expect(await thumbnail.locator('img').evaluate((element) => element.currentSrc)).toMatch(/\.webp$/)
+  await thumbnail.click()
+  const fullImage = page.getByRole('dialog').locator('img')
+  await expect.poll(() => fullImage.evaluate((element) => element.complete && element.naturalWidth > 0)).toBe(true)
+  expect(await fullImage.evaluate((element) => element.currentSrc)).toMatch(/\.webp$/)
 })

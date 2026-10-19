@@ -3,7 +3,7 @@ import { access, mkdir, readFile, readdir, rename, writeFile } from 'node:fs/pro
 import { join, parse } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import sharp from 'sharp'
-import { heroFile, imageWidths } from '../src/image-config.js'
+import { heroFile, imageWidths, galleryWidths } from '../src/image-config.js'
 
 const publicDir = fileURLToPath(new URL('../public/', import.meta.url))
 const outputDir = join(publicDir, 'optimized')
@@ -32,7 +32,9 @@ async function optimize(file, mobile = false) {
   const width = rotated ? metadata.height : metadata.width
   const height = rotated ? metadata.width : metadata.height
   const maxWidth = mobile ? Math.min(width, Math.floor(height * 2 / 3), 1024) : width
-  const widths = [...new Set(imageWidths.map((size) => Math.min(size, maxWidth)))]
+  // Intermediate candidates use the same recipe without invalidating existing files.
+  const requestedWidths = mobile ? imageWidths : [...imageWidths, ...galleryWidths]
+  const widths = [...new Set(requestedWidths.map((size) => Math.min(size, maxWidth)))].sort((a, b) => a - b)
   const hash = createHash('sha256').update(input).update(JSON.stringify({ ...recipe, mobile })).digest('hex').slice(0, 12)
   const name = `${parse(file).name}${mobile ? '-mobile' : ''}-${hash}`
   const result = { width: mobile ? maxWidth : width, height: mobile ? Math.round(maxWidth * 3 / 2) : height }

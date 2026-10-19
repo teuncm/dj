@@ -2,6 +2,7 @@ import { readFile, writeFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createServer } from 'vite'
+import { validateSeoBuild } from './validate-seo.mjs'
 
 export async function prerender() {
   const server = await createServer({
@@ -15,6 +16,7 @@ export async function prerender() {
     const marker = '<!--app-html-->'
     if (!template.includes(marker)) throw new Error('Build HTML is missing the prerender marker.')
     await writeFile(output, template.replace(marker, await render()))
+    await validateSeoBuild(resolve(output, '..'))
     console.log('Pre-rendered the portfolio into static HTML.')
   } finally {
     await server.close()
