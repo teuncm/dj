@@ -21,3 +21,5 @@ Sitemap: https://teuncm.nl/dj/sitemap.xml
 ```
 
 This repository deploys under `/dj/`, so it cannot manage the root website's robots file. A `/dj/robots.txt` file would not control crawling. See [Google's sitemap guidance](https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap) and [robots.txt placement requirements](https://developers.google.com/crawling/docs/robots-txt/robots-txt-spec).
+
+The [live main-site audit and integration notes](docs/main-site-seo.md) record the verified SoundCloud URL and the remaining root-site changes. Portfolio structured data uses the existing homepage Person and WebSite identifiers; profile URLs and identity settings live in `src/site-config.js`.

@@ -162,6 +162,14 @@ h2 {
 .section-heading {
   padding: 0 4vw 100px;
 }
+.breadcrumbs {
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  color: var(--muted);
+  font: 0.66rem 'DM Mono', monospace;
+}
+.breadcrumbs a { font: inherit; letter-spacing: inherit; text-transform: none; }
 h2 { font-size: clamp(4.5rem, 10vw, 10rem); }
 
 .gallery { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
